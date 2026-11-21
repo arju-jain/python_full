@@ -66,7 +66,17 @@
         <div class="col-6 col-md-4 col-lg-2">
           <a href="{% url 'catalog:product_list_by_category' category_slug=cat.slug %}" class="category-card text-decoration-none">
             <div class="cat-icon">
-              <i class="bi bi-stars"></i>
+              {% if cat.image %}
+                <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+              {% elif cat.slug == 'fine-timepieces' %}
+                <i class="bi bi-watch"></i>
+              {% elif cat.slug == 'high-jewelry' %}
+                <i class="bi bi-gem"></i>
+              {% elif cat.slug == 'dress-couture' %}
+                <i class="bi bi-person-standing-dress"></i>
+              {% else %}
+                <i class="bi bi-stars"></i>
+              {% endif %}
             </div>
             <h6 class="mb-0 text-truncate">{{ cat.name }}</h6>
           </a>

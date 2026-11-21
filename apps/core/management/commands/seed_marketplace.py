@@ -1,15 +1,71 @@
 from decimal import Decimal
+from pathlib import Path
+import shutil
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from apps.accounts.models import User, Address
 from apps.vendors.models import Vendor
-from apps.catalog.models import Category, Product
+from apps.catalog.models import Category, Product, ProductImage
 from apps.inventory.models import Inventory
 from apps.orders.models import Order, OrderItem, SellerFulfillment
 from apps.payments.models import Payment, Commission
 
 class Command(BaseCommand):
     help = "Seeds initial luxury categories, vendors, products, and administrative accounts."
+
+    def ensure_category_image(self, filename):
+        image_dir = Path(settings.MEDIA_ROOT) / 'categories'
+        image_dir.mkdir(parents=True, exist_ok=True)
+        media_path = image_dir / filename
+        source_path = Path(settings.BASE_DIR) / 'static' / 'images' / 'categories' / filename
+
+        if source_path.exists():
+            shutil.copy2(source_path, media_path)
+        return f"categories/{filename}"
+
+    def ensure_seed_image(self, sku, title, category_name):
+        """Create a local premium-looking seed image for a product and return its media path."""
+        image_dir = Path(settings.MEDIA_ROOT) / 'products' / 'seed'
+        image_dir.mkdir(parents=True, exist_ok=True)
+        filename = f"{sku.lower()}-primary.png"
+        image_path = image_dir / filename
+        source_path = Path(settings.BASE_DIR) / 'static' / 'images' / 'products' / filename
+
+        if source_path.exists():
+            shutil.copy2(source_path, image_path)
+            return f"products/seed/{filename}"
+
+        if not image_path.exists():
+            try:
+                from PIL import Image, ImageDraw, ImageFont
+
+                palette = {
+                    'Fine Timepieces': ((18, 20, 19), (176, 146, 103)),
+                    'Artisanal Leather': ((91, 61, 38), (204, 174, 126)),
+                    'High Jewelry': ((32, 35, 43), (205, 181, 125)),
+                }
+                background, accent = palette.get(category_name, ((40, 40, 40), (182, 155, 117)))
+
+                image = Image.new('RGB', (900, 900), background)
+                draw = ImageDraw.Draw(image)
+                draw.rounded_rectangle((70, 70, 830, 830), radius=28, outline=accent, width=8)
+                draw.ellipse((280, 280, 620, 620), outline=accent, width=18)
+                draw.rectangle((440, 210, 460, 690), fill=accent)
+                draw.rectangle((210, 440, 690, 460), fill=accent)
+                draw.ellipse((400, 400, 500, 500), fill=accent)
+
+                font = ImageFont.load_default()
+                title_font = font
+                draw.text((450, 760), title[:44], fill=(255, 255, 255), anchor='mm', font=title_font)
+                draw.text((450, 800), 'AURA LUXE', fill=accent, anchor='mm', font=title_font)
+                image.save(image_path, 'PNG')
+            except ImportError:
+                self.stdout.write(self.style.WARNING("Pillow is unavailable; seed images could not be generated."))
+                return None
+
+        return f"products/seed/{filename}"
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -64,14 +120,34 @@ class Command(BaseCommand):
             name='Fine Timepieces',
             defaults={'slug': 'fine-timepieces', 'description': 'Handcrafted chronometers and perpetual complications.'}
         )
+        cat_time.image = self.ensure_category_image('ach-perp-01-primary.png')
+        cat_time.is_featured = True
+        cat_time.save()
         cat_leather, _ = Category.objects.get_or_create(
             name='Artisanal Leather',
             defaults={'slug': 'artisanal-leather', 'description': 'Full-grain saddle stitched luggage and accessories.'}
         )
+        cat_leather.is_featured = True
+        cat_leather.save()
         cat_jewelry, _ = Category.objects.get_or_create(
             name='High Jewelry',
             defaults={'slug': 'high-jewelry', 'description': 'Natural gemstones, solitaire diamonds, and platinum creations.'}
         )
+        cat_jewelry.image = self.ensure_category_image('vdm-sol-01-primary.png')
+        cat_jewelry.is_featured = True
+        cat_jewelry.save()
+        cat_dress, _ = Category.objects.get_or_create(
+            name='Dress & Couture',
+            defaults={
+                'slug': 'dress-couture',
+                'description': 'Elevated ready-to-wear and statement couture.',
+                'image': 'categories/dress.jpg',
+                'is_featured': True,
+            }
+        )
+        cat_dress.image = self.ensure_category_image('dress.jpg')
+        cat_dress.is_featured = True
+        cat_dress.save()
 
         # 4. Vendors
         # Vendor 1: Geneva Horlogerie
@@ -170,6 +246,20 @@ class Command(BaseCommand):
                 }
             )
             Inventory.objects.get_or_create(product=p, defaults={'quantity': stock})
+            image_name = self.ensure_seed_image(sku, title, category.name)
+            if image_name:
+                image, _ = ProductImage.objects.get_or_create(
+                    product=p,
+                    sort_order=0,
+                    defaults={
+                        'alt_text': title,
+                        'is_primary': True,
+                    }
+                )
+                image.image = image_name
+                image.alt_text = title
+                image.is_primary = True
+                image.save()
 
         self.stdout.write(self.style.SUCCESS("Luxury products and inventories seeded."))
 
