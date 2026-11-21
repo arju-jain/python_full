@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Admin Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand-sub text-danger">Administrator Console</div>
+    <nav class="d-flex flex-column">
+      <a href="{% url 'dashboard:admin_overview' %}" class="dashboard-nav-item"><i class="bi bi-speedometer2"></i> Control Center</a>
+      <a href="{% url 'dashboard:admin_vendors' %}" class="dashboard-nav-item active"><i class="bi bi-shop"></i> Vendor Operations</a>
+      <a href="{% url 'dashboard:admin_products' %}" class="dashboard-nav-item"><i class="bi bi-gem"></i> Catalog Moderation</a>
+      <a href="{% url 'dashboard:admin_orders' %}" class="dashboard-nav-item"><i class="bi bi-receipt"></i> Orders Monitor</a>
+      <a href="{% url 'dashboard:admin_transactions' %}" class="dashboard-nav-item"><i class="bi bi-wallet2"></i> Ledger & Payouts</a>
+    </nav>
+  </aside>
+
+  <main class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Vendor Store Operations</h1>
+        <p class="dashboard-subtitle">Review onboarding dossiers, manage boutique statuses, and configure seller permissions.</p>
+      </div>
+    </div>
+
+    <!-- Active Vendor Boutiques -->
+    <div class="dashboard-card mb-5">
+      <div class="dashboard-card-header">
+        <h5 class="dashboard-card-title">Registered Merchant Boutiques ({{ vendors.count }})</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-aura align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Store Name</th>
+              <th>Owner Account</th>
+              <th>Commission Rate</th>
+              <th>Status</th>
+              <th>Registered</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in vendors %}
+              <tr>
+                <td>
+                  <a href="{% url 'vendors:store_detail' slug=v.slug %}" target="_blank" class="fw-bold text-dark text-decoration-none">
+                    {{ v.store_name }} <i class="bi bi-box-arrow-up-right small text-muted ms-1"></i>
+                  </a>
+                </td>
+                <td class="small">{{ v.user.email }}</td>
+                <td class="fw-semibold">{{ v.commission_rate }}%</td>
+                <td>
+                  <span class="badge badge-status badge-{{ v.status|lower }}">
+                    {{ v.get_status_display }}
+                  </span>
+                </td>
+                <td class="small text-muted">{{ v.created_at|date:"M d, Y" }}</td>
+                <td class="text-end">
+                  <form action="{% url 'dashboard:admin_vendor_toggle_status' vendor_id=v.id %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    {% if v.status == 'APPROVED' %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Suspend Store">
+                        <i class="bi bi-pause-circle me-1"></i> Suspend
+                      </button>
+                    {% else %}
+                      <button type="submit" class="btn btn-sm btn-outline-success" title="Reactivate Store">
+                        <i class="bi bi-play-circle me-1"></i> Reactivate
+                      </button>
+                    {% endif %}
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center py-4 text-muted">No vendors registered yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Vendor Onboarding Dossiers -->
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <h5 class="dashboard-card-title">Onboarding Applications Dossier ({{ applications.count }})</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-aura align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Store Name</th>
+              <th>Applicant</th>
+              <th>Tax ID</th>
+              <th>Status</th>
+              <th>Submitted</th>
+              <th class="text-end">Decision</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for app in applications %}
+              <tr>
+                <td>
+                  <strong>{{ app.store_name }}</strong>
+                  <div class="small text-muted text-truncate" style="max-width: 200px;">{{ app.business_details }}</div>
+                </td>
+                <td class="small">
+                  {{ app.user.email }}<br>
+                  <span class="text-muted">{{ app.phone_number }}</span>
+                </td>
+                <td class="small"><code>{{ app.tax_id|default:"N/A" }}</code></td>
+                <td>
+                  <span class="badge badge-status badge-{{ app.status|lower }}">
+                    {{ app.get_status_display }}
+                  </span>
+                </td>
+                <td class="small text-muted">{{ app.created_at|date:"M d, Y" }}</td>
+                <td class="text-end">
+                  {% if app.status == 'PENDING' %}
+                    <form action="{% url 'dashboard:admin_vendor_approve' app_id=app.id %}" method="POST" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-success py-1 px-2">Approve</button>
+                    </form>
+                    <form action="{% url 'dashboard:admin_vendor_reject' app_id=app.id %}" method="POST" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-danger py-1 px-2">Reject</button>
+                    </form>
+                  {% else %}
+                    <span class="small text-muted">Reviewed</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center py-4 text-muted">No applications submitted.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

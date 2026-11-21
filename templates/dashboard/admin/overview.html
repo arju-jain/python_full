@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Admin Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand-sub text-danger">Administrator Console</div>
+    <div class="px-3 mb-4">
+      <div class="fw-bold text-dark">{{ user.get_full_name }}</div>
+      <div class="small text-muted"><span class="badge bg-danger" style="font-size: 0.65rem;">Platform Superadmin</span></div>
+    </div>
+    <nav class="d-flex flex-column">
+      <a href="{% url 'dashboard:admin_overview' %}" class="dashboard-nav-item active"><i class="bi bi-speedometer2"></i> Control Center</a>
+      <a href="{% url 'dashboard:admin_vendors' %}" class="dashboard-nav-item"><i class="bi bi-shop"></i> Vendor Operations</a>
+      <a href="{% url 'dashboard:admin_products' %}" class="dashboard-nav-item"><i class="bi bi-gem"></i> Catalog Moderation</a>
+      <a href="{% url 'dashboard:admin_orders' %}" class="dashboard-nav-item"><i class="bi bi-receipt"></i> Orders Monitor</a>
+      <a href="{% url 'dashboard:admin_transactions' %}" class="dashboard-nav-item"><i class="bi bi-wallet2"></i> Ledger & Payouts</a>
+      <hr class="my-3">
+      <a href="/admin/" target="_blank" class="dashboard-nav-item text-muted"><i class="bi bi-sliders"></i> Django Administration</a>
+    </nav>
+  </aside>
+
+  <main class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Marketplace Control Center</h1>
+        <p class="dashboard-subtitle">Executive oversight across multi-vendor activity, platform GMV, and commissions.</p>
+      </div>
+    </div>
+
+    <!-- Platform KPIs -->
+    <div class="row g-4 mb-4">
+      <div class="col-sm-6 col-xl-4">
+        <div class="stat-card">
+          <span class="stat-label">Platform GMV (Paid Volume)</span>
+          <span class="stat-value">₹{{ platform_gmv }}</span>
+          <span class="stat-trend positive"><i class="bi bi-graph-up-arrow"></i> Across all sellers</span>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-4">
+        <div class="stat-card">
+          <span class="stat-label">Marketplace Commission Earned</span>
+          <span class="stat-value" style="color: var(--aura-accent);">₹{{ total_commissions }}</span>
+          <span class="stat-trend text-dark"><i class="bi bi-cash-stack"></i> Platform gross margin</span>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-4">
+        <div class="stat-card">
+          <span class="stat-label">Pending Vendor Applications</span>
+          <span class="stat-value text-warning">{{ pending_applications_count }}</span>
+          <span class="stat-trend"><a href="{% url 'dashboard:admin_vendors' %}" class="text-decoration-underline text-muted">Review dossier queue</a></span>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-4">
+        <div class="stat-card">
+          <span class="stat-label">Total Customers</span>
+          <span class="stat-value">{{ total_customers }}</span>
+          <span class="stat-trend"><i class="bi bi-people"></i> Registered buyers</span>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-4">
+        <div class="stat-card">
+          <span class="stat-label">Total Active Vendors</span>
+          <span class="stat-value">{{ total_vendors }}</span>
+          <span class="stat-trend"><i class="bi bi-shop"></i> Vetted merchant boutiques</span>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-4">
+        <div class="stat-card">
+          <span class="stat-label">Total Masterpieces</span>
+          <span class="stat-value">{{ total_products }}</span>
+          <span class="stat-trend"><i class="bi bi-gem"></i> Catalog listings</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Applications Review Queue -->
+    {% if pending_applications %}
+      <div class="dashboard-card mb-4 border-warning">
+        <div class="dashboard-card-header bg-warning-subtle">
+          <h5 class="dashboard-card-title text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Pending Vendor Dossiers for Review</h5>
+        </div>
+        <div class="p-4">
+          <div class="d-flex flex-column gap-3">
+            {% for app in pending_applications %}
+              <div class="p-3 bg-white border rounded shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                  <h6 class="mb-1 fw-bold">{{ app.store_name }}</h6>
+                  <div class="small text-muted">
+                    Applicant: <strong>{{ app.user.email }}</strong> &bull; Contact: {{ app.phone_number }} &bull; Tax ID: {{ app.tax_id|default:"N/A" }}
+                  </div>
+                  <div class="small text-muted mt-1 fst-italic">"{{ app.business_details|truncatewords:20 }}"</div>
+                </div>
+                <div class="d-flex gap-2">
+                  <form action="{% url 'dashboard:admin_vendor_approve' app_id=app.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg me-1"></i> Approve Store</button>
+                  </form>
+                  <form action="{% url 'dashboard:admin_vendor_reject' app_id=app.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg me-1"></i> Reject</button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Recent Global Orders Table -->
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <h5 class="dashboard-card-title">Recent Marketplace Orders</h5>
+        <a href="{% url 'dashboard:admin_orders' %}" class="btn btn-sm btn-aura-outline">View All Orders</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-aura align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Order Ref</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Total Amount</th>
+              <th>Payment Status</th>
+              <th>Order Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ord in recent_orders %}
+              <tr>
+                <td><strong>#{{ ord.order_number }}</strong></td>
+                <td>{{ ord.customer.email }}</td>
+                <td class="small text-muted">{{ ord.created_at|date:"M d, Y" }}</td>
+                <td class="fw-bold">₹{{ ord.total_amount }}</td>
+                <td><span class="badge badge-status badge-{{ ord.payment_status|lower }}">{{ ord.get_payment_status_display }}</span></td>
+                <td><span class="badge badge-status badge-{{ ord.status|lower }}">{{ ord.get_status_display }}</span></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center py-4 text-muted">No orders processed yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

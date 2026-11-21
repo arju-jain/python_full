@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Admin Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand-sub text-danger">Administrator Console</div>
+    <nav class="d-flex flex-column">
+      <a href="{% url 'dashboard:admin_overview' %}" class="dashboard-nav-item"><i class="bi bi-speedometer2"></i> Control Center</a>
+      <a href="{% url 'dashboard:admin_vendors' %}" class="dashboard-nav-item"><i class="bi bi-shop"></i> Vendor Operations</a>
+      <a href="{% url 'dashboard:admin_products' %}" class="dashboard-nav-item"><i class="bi bi-gem"></i> Catalog Moderation</a>
+      <a href="{% url 'dashboard:admin_orders' %}" class="dashboard-nav-item"><i class="bi bi-receipt"></i> Orders Monitor</a>
+      <a href="{% url 'dashboard:admin_transactions' %}" class="dashboard-nav-item active"><i class="bi bi-wallet2"></i> Ledger & Payouts</a>
+    </nav>
+  </aside>
+
+  <main class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Financial Ledgers & Payouts</h1>
+        <p class="dashboard-subtitle">Real-time payment settlements, platform commission deductions, and seller disbursements.</p>
+      </div>
+    </div>
+
+    <!-- Platform Commissions Ledger -->
+    <div class="dashboard-card mb-5">
+      <div class="dashboard-card-header">
+        <h5 class="dashboard-card-title"><i class="bi bi-percent text-success me-2"></i> Marketplace Commission Records</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-aura align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Order Ref</th>
+              <th>Artisan Vendor</th>
+              <th>Gross Item Value</th>
+              <th>Fee %</th>
+              <th>Marketplace Retained</th>
+              <th class="text-end">Seller Net Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in commissions %}
+              <tr>
+                <td><strong>#{{ c.order.order_number }}</strong></td>
+                <td>{{ c.vendor.store_name }}</td>
+                <td>₹{{ c.gross_amount }}</td>
+                <td>{{ c.commission_rate }}%</td>
+                <td class="text-success fw-bold">+₹{{ c.commission_amount }}</td>
+                <td class="text-end fw-bold">₹{{ c.net_seller_amount }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center py-4 text-muted">No commissions logged.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Customer Gateway Payments Table -->
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <h5 class="dashboard-card-title"><i class="bi bi-credit-card text-primary me-2"></i> Gateway Payment Transactions</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-aura align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Order #</th>
+              <th>Amount</th>
+              <th>Gateway Ref</th>
+              <th>Payment Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pay in payments %}
+              <tr>
+                <td><code>{{ pay.transaction_id }}</code></td>
+                <td><strong>#{{ pay.order.order_number }}</strong></td>
+                <td class="fw-bold">₹{{ pay.amount }}</td>
+                <td class="small text-muted">{{ pay.razorpay_payment_id|default:"Pending" }}</td>
+                <td>
+                  <span class="badge badge-status badge-{{ pay.status|lower }}">
+                    {{ pay.get_status_display }}
+                  </span>
+                </td>
+                <td class="small text-muted">{{ pay.created_at|date:"M d, Y" }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="6" class="text-center py-4 text-muted">No payments captured.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
