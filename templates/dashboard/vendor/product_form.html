@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Vendor Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand-sub">Seller Cockpit</div>
+    <nav class="d-flex flex-column">
+      <a href="{% url 'dashboard:vendor_overview' %}" class="dashboard-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+      <a href="{% url 'dashboard:vendor_products' %}" class="dashboard-nav-item active"><i class="bi bi-box-seam"></i> Products</a>
+      <a href="{% url 'dashboard:vendor_orders' %}" class="dashboard-nav-item"><i class="bi bi-truck"></i> Shipments & Orders</a>
+      <a href="{% url 'dashboard:vendor_analytics' %}" class="dashboard-nav-item"><i class="bi bi-graph-up"></i> Sales Analytics</a>
+      <a href="{% url 'dashboard:vendor_settings' %}" class="dashboard-nav-item"><i class="bi bi-gear"></i> Store & Payouts</a>
+    </nav>
+  </aside>
+
+  <main class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">{% if product %}Edit {{ product.title }}{% else %}Add New Creation{% endif %}</h1>
+        <p class="dashboard-subtitle">Specify product details, upload high-resolution images, and set stock levels.</p>
+      </div>
+      <div>
+        <a href="{% url 'dashboard:vendor_products' %}" class="btn btn-aura-outline">
+          <i class="bi bi-arrow-left me-1"></i> Back to Catalog
+        </a>
+      </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger py-2 small mb-4">
+          {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="row g-4">
+        <!-- Main Info -->
+        <div class="col-lg-8">
+          <div class="dashboard-card p-4">
+            <h5 class="fw-bold mb-4">General Product Details</h5>
+
+            <div class="mb-3">
+              <label class="form-label">Product Title</label>
+              {{ form.title }}
+              {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Curated Collection / Category</label>
+                {{ form.category }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">SKU (Stock Keeping Unit)</label>
+                {{ form.sku }}
+                {% if form.sku.errors %}<div class="text-danger small mt-1">{{ form.sku.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Brief Highlight (1-2 Sentences)</label>
+              {{ form.short_description }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Full Provenance, Materials & Care</label>
+              {{ form.description }}
+            </div>
+          </div>
+
+          <!-- Product Image Gallery FormSet -->
+          <div class="dashboard-card p-4">
+            <h5 class="fw-bold mb-3">Product Image Gallery</h5>
+            <p class="small text-muted mb-4">Upload studio photography. Select 'Is Primary' for the hero card thumbnail.</p>
+
+            {{ formset.management_form }}
+            {% for img_form in formset %}
+              <div class="p-3 mb-3 border rounded bg-light">
+                <div class="row g-3 align-items-center">
+                  {% if img_form.instance.pk and img_form.instance.image %}
+                    <div class="col-auto">
+                      <img src="{{ img_form.instance.image.url }}" alt="Preview" style="width: 50px; height: 50px; object-fit: cover;" class="rounded border">
+                    </div>
+                  {% endif %}
+                  <div class="col">
+                    <label class="small text-muted mb-1">Image File</label>
+                    {{ img_form.image }}
+                  </div>
+                  <div class="col-md-4">
+                    <label class="small text-muted mb-1">Alt Text</label>
+                    {{ img_form.alt_text }}
+                  </div>
+                  <div class="col-auto text-center">
+                    <label class="small text-muted d-block mb-1">Primary</label>
+                    {{ img_form.is_primary }}
+                  </div>
+                  {% if img_form.instance.pk %}
+                    <div class="col-auto text-center">
+                      <label class="small text-danger d-block mb-1">Delete</label>
+                      {{ img_form.DELETE }}
+                    </div>
+                  {% endif %}
+                </div>
+                {{ img_form.id }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Pricing & Inventory Sidebar -->
+        <div class="col-lg-4">
+          <div class="dashboard-card p-4 mb-4">
+            <h5 class="fw-bold mb-3">Pricing & Inventory</h5>
+
+            <div class="mb-3">
+              <label class="form-label">Selling Price (₹)</label>
+              {{ form.price }}
+              {% if form.price.errors %}<div class="text-danger small mt-1">{{ form.price.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Compare-at Price (₹)</label>
+              {{ form.compare_at_price }}
+              <div class="form-text small">Shows strike-through original value for discounts.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Inventory Stock Available</label>
+              {{ form.stock_quantity }}
+              {% if form.stock_quantity.errors %}<div class="text-danger small mt-1">{{ form.stock_quantity.errors.0 }}</div>{% endif %}
+              <div class="form-text small">Units available in warehouse/atelier for immediate order.</div>
+            </div>
+          </div>
+
+          <div class="dashboard-card p-4 mb-4">
+            <h5 class="fw-bold mb-3">Visibility & Status</h5>
+
+            <div class="form-check mb-3">
+              {{ form.is_active }}
+              <label class="form-check-label small fw-semibold" for="{{ form.is_active.id_for_label }}">
+                Active in Marketplace
+              </label>
+              <div class="form-text small">Uncheck to temporarily hide from customer search.</div>
+            </div>
+
+            <div class="form-check mb-3">
+              {{ form.is_featured }}
+              <label class="form-check-label small fw-semibold" for="{{ form.is_featured.id_for_label }}">
+                Feature on Homepage
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-aura w-100 py-3">
+            <i class="bi bi-save me-1"></i> Save Product Creation
+          </button>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Vendor Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand-sub">Seller Cockpit</div>
+    <nav class="d-flex flex-column">
+      <a href="{% url 'dashboard:vendor_overview' %}" class="dashboard-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+      <a href="{% url 'dashboard:vendor_products' %}" class="dashboard-nav-item"><i class="bi bi-box-seam"></i> Products</a>
+      <a href="{% url 'dashboard:vendor_orders' %}" class="dashboard-nav-item"><i class="bi bi-truck"></i> Shipments & Orders</a>
+      <a href="{% url 'dashboard:vendor_analytics' %}" class="dashboard-nav-item"><i class="bi bi-graph-up"></i> Sales Analytics</a>
+      <a href="{% url 'dashboard:vendor_settings' %}" class="dashboard-nav-item active"><i class="bi bi-gear"></i> Store & Payouts</a>
+    </nav>
+  </aside>
+
+  <main class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Boutique Profile & Banking</h1>
+        <p class="dashboard-subtitle">Manage store branding, contact details, and settlement bank accounts.</p>
+      </div>
+      <div>
+        <a href="{% url 'vendors:store_detail' slug=vendor.slug %}" target="_blank" class="btn btn-aura-outline">
+          <i class="bi bi-box-arrow-up-right me-1"></i> Preview Storefront
+        </a>
+      </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="row g-4">
+        <!-- Store Branding Details -->
+        <div class="col-lg-7">
+          <div class="dashboard-card p-4">
+            <h5 class="fw-bold mb-4">Atelier Branding</h5>
+
+            <div class="mb-3">
+              <label class="form-label">Storefront Name</label>
+              {{ form.store_name }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Storefront Description & Heritage</label>
+              {{ form.description }}
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Business Contact Email</label>
+                {{ form.contact_email }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Business Phone</label>
+                {{ form.phone_number }}
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Logo / Emblem</label>
+                {% if vendor.logo %}
+                  <div class="mb-2"><img src="{{ vendor.logo.url }}" alt="Logo" style="width: 50px; height: 50px; object-fit: cover;" class="rounded border"></div>
+                {% endif %}
+                {{ form.logo }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Header Banner</label>
+                {% if vendor.banner %}
+                  <div class="mb-2"><img src="{{ vendor.banner.url }}" alt="Banner" style="width: 100px; height: 40px; object-fit: cover;" class="rounded border"></div>
+                {% endif %}
+                {{ form.banner }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Banking Settlement Info -->
+        <div class="col-lg-5">
+          <div class="dashboard-card p-4">
+            <h5 class="fw-bold mb-3">Disbursement Banking Details</h5>
+            <p class="small text-muted mb-4">Marketplace payouts are calculated net of commissions and disbursed directly to this account.</p>
+
+            <div class="mb-3">
+              <label class="form-label">Account Beneficiary Name</label>
+              {{ form.bank_account_holder }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Bank Account Number</label>
+              {{ form.bank_account_number }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">IFSC / Routing Code</label>
+              {{ form.bank_ifsc_code }}
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label">Bank Name & Branch</label>
+              {{ form.bank_name }}
+            </div>
+
+            <div class="p-3 bg-light border rounded small mb-4">
+              <strong>Agreed Commission Rate:</strong> {{ vendor.commission_rate }}%
+            </div>
+
+            <button type="submit" class="btn btn-aura w-100 py-3">
+              <i class="bi bi-save me-1"></i> Save Store Configuration
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>
+{% endblock %}

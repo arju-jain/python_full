@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Vendor Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand-sub">Seller Cockpit</div>
+    <nav class="d-flex flex-column">
+      <a href="{% url 'dashboard:vendor_overview' %}" class="dashboard-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+      <a href="{% url 'dashboard:vendor_products' %}" class="dashboard-nav-item"><i class="bi bi-box-seam"></i> Products</a>
+      <a href="{% url 'dashboard:vendor_orders' %}" class="dashboard-nav-item"><i class="bi bi-truck"></i> Shipments & Orders</a>
+      <a href="{% url 'dashboard:vendor_analytics' %}" class="dashboard-nav-item active"><i class="bi bi-graph-up"></i> Sales Analytics</a>
+      <a href="{% url 'dashboard:vendor_settings' %}" class="dashboard-nav-item"><i class="bi bi-gear"></i> Store & Payouts</a>
+    </nav>
+  </aside>
+
+  <main class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Sales & Financial Analytics</h1>
+        <p class="dashboard-subtitle">Revenue realization, commission breakdown, and top-selling artisan creations.</p>
+      </div>
+    </div>
+
+    <!-- Financial KPI Summary -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="stat-card">
+          <span class="stat-label">Total Realized GMV</span>
+          <span class="stat-value">₹{{ total_gross }}</span>
+          <span class="stat-trend positive"><i class="bi bi-arrow-up-right"></i> Gross customer value</span>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <span class="stat-label">Marketplace Commission ({{ vendor.commission_rate }}%)</span>
+          <span class="stat-value">₹{{ total_commission }}</span>
+          <span class="stat-trend text-muted"><i class="bi bi-percent"></i> Retained by platform</span>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <span class="stat-label">Net Settled Earnings</span>
+          <span class="stat-value" style="color: var(--aura-accent);">₹{{ total_net }}</span>
+          <span class="stat-trend positive"><i class="bi bi-wallet2"></i> Ready for disbursement</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Top Performing Products -->
+      <div class="col-lg-5">
+        <div class="dashboard-card p-4 h-100">
+          <h5 class="fw-bold mb-3">Top Performing Products</h5>
+          {% if top_products %}
+            <div class="d-flex flex-column gap-3">
+              {% for p in top_products %}
+                <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                  <div>
+                    <div class="fw-semibold small">{{ p.product_title }}</div>
+                    <span class="small text-muted">{{ p.units_sold }} units sold</span>
+                  </div>
+                  <div class="fw-bold">₹{{ p.total_rev }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted small py-4 text-center">No sales data recorded yet.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Commission Ledger Records -->
+      <div class="col-lg-7">
+        <div class="dashboard-card p-4 h-100">
+          <h5 class="fw-bold mb-3">Recent Commission Ledger</h5>
+          <div class="table-responsive">
+            <table class="table table-aura align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Order Ref</th>
+                  <th>Gross</th>
+                  <th>Fee</th>
+                  <th class="text-end">Net Payout</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for comm in commissions %}
+                  <tr>
+                    <td>
+                      <span class="small fw-semibold">#{{ comm.order.order_number }}</span>
+                      <div class="small text-muted" style="font-size: 0.7rem;">{{ comm.created_at|date:"M d" }}</div>
+                    </td>
+                    <td>₹{{ comm.gross_amount }}</td>
+                    <td class="text-danger">-₹{{ comm.commission_amount }}</td>
+                    <td class="text-end fw-bold text-success">₹{{ comm.net_seller_amount }}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center py-4 text-muted small">No transactions settled yet.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

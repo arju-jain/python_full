@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Vendor Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand-sub">Seller Cockpit</div>
+    <div class="px-3 mb-4">
+      <div class="fw-bold text-dark text-truncate">{{ vendor.store_name }}</div>
+    </div>
+    <nav class="d-flex flex-column">
+      <a href="{% url 'dashboard:vendor_overview' %}" class="dashboard-nav-item">
+        <i class="bi bi-speedometer2"></i> Overview
+      </a>
+      <a href="{% url 'dashboard:vendor_products' %}" class="dashboard-nav-item active">
+        <i class="bi bi-box-seam"></i> Products
+      </a>
+      <a href="{% url 'dashboard:vendor_orders' %}" class="dashboard-nav-item">
+        <i class="bi bi-truck"></i> Shipments & Orders
+      </a>
+      <a href="{% url 'dashboard:vendor_analytics' %}" class="dashboard-nav-item">
+        <i class="bi bi-graph-up"></i> Sales Analytics
+      </a>
+      <a href="{% url 'dashboard:vendor_settings' %}" class="dashboard-nav-item">
+        <i class="bi bi-gear"></i> Store & Payouts
+      </a>
+    </nav>
+  </aside>
+
+  <main class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Boutique Catalog</h1>
+        <p class="dashboard-subtitle">Manage inventory stock, pricing, and showcase imagery.</p>
+      </div>
+      <div>
+        <a href="{% url 'dashboard:vendor_product_add' %}" class="btn btn-aura">
+          <i class="bi bi-plus-lg me-1"></i> Add New Product
+        </a>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="table-responsive">
+        <table class="table table-aura align-middle mb-0">
+          <thead>
+            <tr>
+              <th style="min-width: 250px;">Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock Level</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in products %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="rounded border p-1 bg-light" style="width: 50px; height: 50px; flex-shrink: 0; overflow: hidden;">
+                      {% if p.primary_image %}
+                        <img src="{{ p.primary_image.image.url }}" alt="{{ p.title }}" class="w-100 h-100 object-fit-cover rounded">
+                      {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted"><i class="bi bi-gem"></i></div>
+                      {% endif %}
+                    </div>
+                    <div>
+                      <a href="{{ p.get_absolute_url }}" class="fw-bold text-dark text-decoration-none d-block small" target="_blank">
+                        {{ p.title }}
+                      </a>
+                      <span class="small text-muted" style="font-size: 0.75rem;">SKU: {{ p.sku }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="small">{{ p.category.name|default:"Unassigned" }}</td>
+                <td class="fw-bold">₹{{ p.price }}</td>
+                <td>
+                  {% if p.stock_quantity == 0 %}
+                    <span class="badge bg-danger">Out of Stock (0)</span>
+                  {% elif p.stock_quantity <= 5 %}
+                    <span class="badge bg-warning text-dark">Low: {{ p.stock_quantity }}</span>
+                  {% else %}
+                    <span class="badge bg-success">{{ p.stock_quantity }} units</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if p.is_active %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                  {% else %}
+                    <span class="badge bg-secondary-subtle text-secondary border">Hidden</span>
+                  {% endif %}
+                  {% if p.is_featured %}
+                    <span class="badge bg-dark small ms-1">Featured</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <a href="{% url 'dashboard:vendor_product_edit' pk=p.pk %}" class="btn btn-sm btn-outline-dark me-1" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form action="{% url 'dashboard:vendor_product_delete' pk=p.pk %}" method="POST" class="d-inline" onsubmit="return confirm('Delete this product permanently?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center py-5 text-muted">
+                  <p class="mb-3">Your boutique has not added any products yet.</p>
+                  <a href="{% url 'dashboard:vendor_product_add' %}" class="btn btn-aura">Create Your First Creation</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Vendor Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand-sub">Seller Cockpit</div>
+    <nav class="d-flex flex-column">
+      <a href="{% url 'dashboard:vendor_overview' %}" class="dashboard-nav-item"><i class="bi bi-speedometer2"></i> Overview</a>
+      <a href="{% url 'dashboard:vendor_products' %}" class="dashboard-nav-item"><i class="bi bi-box-seam"></i> Products</a>
+      <a href="{% url 'dashboard:vendor_orders' %}" class="dashboard-nav-item active"><i class="bi bi-truck"></i> Shipments & Orders</a>
+      <a href="{% url 'dashboard:vendor_analytics' %}" class="dashboard-nav-item"><i class="bi bi-graph-up"></i> Sales Analytics</a>
+      <a href="{% url 'dashboard:vendor_settings' %}" class="dashboard-nav-item"><i class="bi bi-gear"></i> Store & Payouts</a>
+    </nav>
+  </aside>
+
+  <main class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">Seller Shipments & Orders</h1>
+        <p class="dashboard-subtitle">Fulfill assigned customer line items and register courier tracking codes.</p>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="btn-group btn-group-sm">
+        <a href="{% url 'dashboard:vendor_orders' %}" class="btn btn-outline-dark {% if not current_status %}active{% endif %}">All</a>
+        <a href="{% url 'dashboard:vendor_orders' %}?status=PENDING" class="btn btn-outline-dark {% if current_status == 'PENDING' %}active{% endif %}">Pending</a>
+        <a href="{% url 'dashboard:vendor_orders' %}?status=PROCESSING" class="btn btn-outline-dark {% if current_status == 'PROCESSING' %}active{% endif %}">In Packaging</a>
+        <a href="{% url 'dashboard:vendor_orders' %}?status=SHIPPED" class="btn btn-outline-dark {% if current_status == 'SHIPPED' %}active{% endif %}">Dispatched</a>
+        <a href="{% url 'dashboard:vendor_orders' %}?status=DELIVERED" class="btn btn-outline-dark {% if current_status == 'DELIVERED' %}active{% endif %}">Delivered</a>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="table-responsive">
+        <table class="table table-aura align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Order Ref</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Destination</th>
+              <th>Your Items Total</th>
+              <th>Fulfillment</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in fulfillments %}
+              <tr>
+                <td><strong>#{{ f.order.order_number }}</strong></td>
+                <td class="small text-muted">{{ f.created_at|date:"M d, Y" }}</td>
+                <td class="small fw-semibold">{{ f.order.shipping_full_name }}</td>
+                <td class="small text-muted">{{ f.order.shipping_city }}, {{ f.order.shipping_state }}</td>
+                <td class="fw-bold">₹{{ f.vendor_subtotal }}</td>
+                <td>
+                  <span class="badge badge-status badge-{{ f.status|lower }}">
+                    {{ f.get_status_display }}
+                  </span>
+                </td>
+                <td>
+                  <a href="{% url 'dashboard:vendor_order_detail' pk=f.pk %}" class="btn btn-sm btn-aura py-1 px-3">
+                    Fulfill & Dispatch
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="text-center py-5 text-muted">
+                  No shipments matching current criteria.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

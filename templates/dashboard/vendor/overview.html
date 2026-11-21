@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Vendor Sidebar Navigation -->
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-brand-sub">Seller Cockpit</div>
+    <div class="px-3 mb-4">
+      <div class="fw-bold text-dark text-truncate">{{ vendor.store_name }}</div>
+      <div class="small text-muted"><span class="badge bg-success" style="font-size: 0.65rem;">Approved Boutique</span></div>
+    </div>
+
+    <nav class="d-flex flex-column">
+      <a href="{% url 'dashboard:vendor_overview' %}" class="dashboard-nav-item active">
+        <i class="bi bi-speedometer2"></i> Overview
+      </a>
+      <a href="{% url 'dashboard:vendor_products' %}" class="dashboard-nav-item">
+        <i class="bi bi-box-seam"></i> Products ({{ total_products_count }})
+      </a>
+      <a href="{% url 'dashboard:vendor_orders' %}" class="dashboard-nav-item">
+        <i class="bi bi-truck"></i> Shipments & Orders
+      </a>
+      <a href="{% url 'dashboard:vendor_analytics' %}" class="dashboard-nav-item">
+        <i class="bi bi-graph-up"></i> Sales Analytics
+      </a>
+      <a href="{% url 'dashboard:vendor_settings' %}" class="dashboard-nav-item">
+        <i class="bi bi-gear"></i> Store & Payouts
+      </a>
+      <hr class="my-3">
+      <a href="{% url 'vendors:store_detail' slug=vendor.slug %}" target="_blank" class="dashboard-nav-item text-muted">
+        <i class="bi bi-box-arrow-up-right"></i> View Public Boutique
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Vendor Content -->
+  <main class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <h1 class="dashboard-title">{{ vendor.store_name }} Cockpit</h1>
+        <p class="dashboard-subtitle">Monitor boutique performance, dispatch orders, and manage inventory.</p>
+      </div>
+      <div>
+        <a href="{% url 'dashboard:vendor_product_add' %}" class="btn btn-aura">
+          <i class="bi bi-plus-lg me-1"></i> Add New Product
+        </a>
+      </div>
+    </div>
+
+    <!-- Stat KPIs -->
+    <div class="row g-4 mb-4">
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-label">Gross Revenue</span>
+          <span class="stat-value">₹{{ gross_sales }}</span>
+          <span class="stat-trend positive"><i class="bi bi-check-circle"></i> Paid volume</span>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-label">Net Seller Earnings</span>
+          <span class="stat-value">₹{{ net_earnings }}</span>
+          <span class="stat-trend"><i class="bi bi-wallet2"></i> After {{ vendor.commission_rate }}% commission</span>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-label">Pending Shipments</span>
+          <span class="stat-value">{{ pending_fulfillment_count }}</span>
+          <span class="stat-trend text-warning"><i class="bi bi-hourglass-split"></i> Awaiting dispatch</span>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <span class="stat-label">Low Stock Alerts</span>
+          <span class="stat-value">{{ low_stock_count }}</span>
+          <span class="stat-trend {% if low_stock_count > 0 %}text-danger{% else %}text-muted{% endif %}">
+            <i class="bi bi-exclamation-triangle"></i> &le; 5 units left
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Seller Fulfillments Table -->
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <h5 class="dashboard-card-title">Recent Order Shipments Assigned to Your Store</h5>
+        <a href="{% url 'dashboard:vendor_orders' %}" class="btn btn-sm btn-aura-outline">View All Shipments</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-aura align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Order Number</th>
+              <th>Date</th>
+              <th>Customer Recipient</th>
+              <th>Store Items Total</th>
+              <th>Fulfillment Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fulfillment in recent_fulfillments %}
+              <tr>
+                <td><strong>#{{ fulfillment.order.order_number }}</strong></td>
+                <td class="small text-muted">{{ fulfillment.created_at|date:"M d, Y" }}</td>
+                <td class="small">{{ fulfillment.order.shipping_full_name }} ({{ fulfillment.order.shipping_city }})</td>
+                <td class="fw-bold">₹{{ fulfillment.vendor_subtotal }}</td>
+                <td>
+                  <span class="badge badge-status badge-{{ fulfillment.status|lower }}">
+                    {{ fulfillment.get_status_display }}
+                  </span>
+                </td>
+                <td>
+                  <a href="{% url 'dashboard:vendor_order_detail' pk=fulfillment.pk %}" class="btn btn-sm btn-outline-dark py-1 px-3">
+                    Fulfill Order
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">
+                  No orders placed for your boutique yet. Ensure your products are published and active.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
