@@ -1,0 +1,177 @@
+/* ==========================================================================
+   AURA LUXE — Multi-Vendor Dashboard & Portal Styles
+   ========================================================================== */
+
+.dashboard-wrapper {
+  display: flex;
+  min-height: calc(100vh - 120px);
+}
+
+.dashboard-sidebar {
+  width: 260px;
+  background: #FFFFFF;
+  border-right: 1px solid var(--aura-border);
+  padding: 30px 16px;
+  flex-shrink: 0;
+}
+
+.dashboard-brand-sub {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--aura-accent);
+  margin-bottom: 24px;
+  padding-left: 14px;
+}
+
+.dashboard-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-radius: var(--aura-radius);
+  color: var(--aura-text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  transition: all 0.2s ease;
+}
+
+.dashboard-nav-item i {
+  font-size: 1.15rem;
+  color: var(--aura-text-muted);
+}
+
+.dashboard-nav-item:hover {
+  background: var(--aura-bg);
+  color: var(--aura-accent);
+}
+
+.dashboard-nav-item:hover i {
+  color: var(--aura-accent);
+}
+
+.dashboard-nav-item.active {
+  background: var(--aura-text);
+  color: #FFFFFF;
+}
+
+.dashboard-nav-item.active i {
+  color: var(--aura-accent);
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 36px 40px;
+  background: var(--aura-bg);
+  overflow-x: hidden;
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.dashboard-title {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+}
+
+.dashboard-subtitle {
+  color: var(--aura-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+/* Stat Cards */
+.stat-card {
+  background: #FFFFFF;
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius-lg);
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  box-shadow: var(--aura-shadow-sm);
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--aura-text-muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--aura-text);
+  font-family: 'Cinzel', serif;
+  margin-bottom: 6px;
+}
+
+.stat-trend {
+  font-size: 0.8rem;
+  color: var(--aura-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-trend.positive {
+  color: var(--aura-success);
+}
+
+/* Dashboard White Card */
+.dashboard-card {
+  background: #FFFFFF;
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius-lg);
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+.dashboard-card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--aura-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #FAF9F5;
+}
+
+.dashboard-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.dashboard-card-body {
+  padding: 24px;
+}
+
+@media (max-width: 991px) {
+  .dashboard-wrapper {
+    flex-direction: column;
+  }
+  .dashboard-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--aura-border);
+    padding: 16px;
+  }
+  .dashboard-content {
+    padding: 20px 16px;
+  }
+}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5 my-lg-4">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="card p-4 p-md-5 border shadow-sm bg-white" style="border-radius: var(--aura-radius-lg);">
+        <div class="text-center mb-4">
+          <span class="section-subtitle">Membership</span>
+          <h2 class="h3 fw-bold mb-2">Create Customer Account</h2>
+          <p class="small text-muted">Join Aura Luxe to acquire authenticated works and manage private orders.</p>
+        </div>
+
+        <form method="POST" action="{% url 'accounts:register' %}">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger py-2 small mb-3">
+              {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">First Name</label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Last Name</label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Phone Number</label>
+            {{ form.phone_number }}
+            {% if form.phone_number.errors %}<div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Password</label>
+              {{ form.password }}
+              {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Confirm Password</label>
+              {{ form.confirm_password }}
+              {% if form.confirm_password.errors %}<div class="text-danger small mt-1">{{ form.confirm_password.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-aura w-100 py-2 mb-3">Register Account</button>
+        </form>
+
+        <div class="text-center pt-3 border-top">
+          <span class="small text-muted">Already registered?</span>
+          <a href="{% url 'accounts:login' %}" class="small fw-semibold ms-1">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

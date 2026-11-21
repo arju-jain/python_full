@@ -1,0 +1,62 @@
+<footer class="footer-aura mt-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4 col-md-6">
+        <h5 class="text-white mb-3">AURA <span style="color: var(--aura-accent);">LUXE</span></h5>
+        <p class="small text-muted mb-4" style="line-height: 1.8;">
+          An exclusive global multi-vendor destination dedicated to rare craftsmanship, artisanal masterworks, haute couture and timeless luxury living.
+        </p>
+        <div class="d-flex gap-3 fs-5 text-muted">
+          <a href="#" class="text-muted"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="text-muted"><i class="bi bi-pinterest"></i></a>
+          <a href="#" class="text-muted"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="text-muted"><i class="bi bi-linkedin"></i></a>
+        </div>
+      </div>
+
+      <div class="col-lg-2 col-md-6">
+        <h5>Curations</h5>
+        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+          <li><a href="{% url 'catalog:product_list' %}">All Masterpieces</a></li>
+          {% for cat in nav_categories|slice:":4" %}
+            <li><a href="{% url 'catalog:product_list_by_category' category_slug=cat.slug %}">{{ cat.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <h5>Client Concierge</h5>
+        <ul class="list-unstyled small mb-0 d-flex flex-column gap-2">
+          <li><a href="{% url 'core:about' %}">Our Heritage</a></li>
+          <li><a href="{% url 'core:contact' %}">Private Client Advisory</a></li>
+          <li><a href="{% url 'vendors:apply' %}">Apply as Vendor</a></li>
+          <li><a href="{% url 'core:terms' %}">Terms & Conditions</a></li>
+          <li><a href="{% url 'core:privacy' %}">Privacy Policy</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <h5>Private Gazette</h5>
+        <p class="small text-muted mb-3">Receive bespoke previews of limited editions and private acquisitions.</p>
+        <form action="{% url 'core:newsletter_subscribe' %}" method="POST">
+          {% csrf_token %}
+          <div class="input-group">
+            <input type="email" name="email" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Enter your email" required>
+            <button class="btn btn-sm btn-aura" type="submit">Join</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+      <div>
+        &copy; 2026 Aura Luxe Global Marketplace. All Rights Reserved.
+      </div>
+      <div class="d-flex gap-4">
+        <span><i class="bi bi-shield-check me-1"></i> 256-Bit SSL Encryption</span>
+        <span><i class="bi bi-credit-card me-1"></i> Verified Test Gateways</span>
+        <span><i class="bi bi-box-seam me-1"></i> Insured Global Courier</span>
+      </div>
+    </div>
+  </div>
+</footer>

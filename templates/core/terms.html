@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card p-4 p-md-5 border shadow-sm bg-white">
+        <h2 class="mb-4">Terms and Conditions</h2>
+        <p class="text-muted">Aura Luxe operates as a managed multi-vendor marketplace connecting verified sellers and independent ateliers with global buyers. By using this service, you agree to these commercial terms.</p>
+        <h5 class="mt-4">1. Multi-Vendor Transactions</h5>
+        <p class="small text-muted">Orders placed on Aura Luxe may consist of line items from multiple registered vendors. Each vendor is individually responsible for packaging, dispatching, and fulfilling their respective portion of the transaction within stated transit windows.</p>
+        <h5 class="mt-4">2. Payment & Verification</h5>
+        <p class="small text-muted">Payments are processed through authenticated gateway endpoints (Razorpay test mode during staging). Charges are verified server-side through cryptographic signature verification before fulfillment commences.</p>
+        <h5 class="mt-4">3. Artisan Standards</h5>
+        <p class="small text-muted">Vendors must maintain accurate stock, transparent descriptions, and genuine proof of provenance. Failure to maintain these standards results in immediate store suspension.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

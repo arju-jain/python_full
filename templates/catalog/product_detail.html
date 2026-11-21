@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="breadcrumb-aura">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'catalog:product_list' %}">Collections</a></li>
+      {% if product.category %}
+        <li class="breadcrumb-item"><a href="{% url 'catalog:product_list_by_category' category_slug=product.category.slug %}">{{ product.category.name }}</a></li>
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{{ product.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-5">
+    <!-- Gallery -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm overflow-hidden bg-white mb-3" style="border-radius: var(--aura-radius-lg);">
+        <div class="position-relative" style="padding-top: 100%; background: #F4F1EA;">
+          {% if product.primary_image %}
+            <img id="main-product-gallery-img" src="{{ product.primary_image.image.url }}" alt="{{ product.title }}" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover">
+          {% else %}
+            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center text-muted fs-1">
+              <i class="bi bi-gem"></i>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Thumbnail Row -->
+      {% if product.images.count > 1 %}
+        <div class="d-flex gap-2 overflow-auto pb-2">
+          {% for img in product.images.all %}
+            <div class="border rounded p-1 bg-white cursor-pointer" style="width: 70px; height: 70px; flex-shrink: 0;" onclick="document.getElementById('main-product-gallery-img').src = '{{ img.image.url }}';">
+              <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.title }}" class="w-100 h-100 object-fit-cover rounded">
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Product Summary & Purchase Actions -->
+    <div class="col-lg-6">
+      <div class="ps-lg-3">
+        <!-- Vendor Badge -->
+        <div class="mb-2">
+          <a href="{% url 'vendors:store_detail' slug=product.vendor.slug %}" class="small text-uppercase fw-bold text-muted text-decoration-none" style="letter-spacing: 0.1em;">
+            <i class="bi bi-shop me-1" style="color: var(--aura-accent);"></i> {{ product.vendor.store_name }}
+          </a>
+        </div>
+
+        <h1 class="h2 fw-bold mb-3">{{ product.title }}</h1>
+
+        <!-- Rating & Reviews Count -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="text-warning small">
+            {% for i in "12345" %}
+              {% if forloop.counter <= avg_rating %}
+                <i class="bi bi-star-fill"></i>
+              {% else %}
+                <i class="bi bi-star"></i>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <span class="small fw-semibold">{{ avg_rating }}</span>
+          <span class="small text-muted">({{ reviews.count }} verified review{{ reviews.count|pluralize }})</span>
+        </div>
+
+        <!-- Price -->
+        <div class="d-flex align-items-baseline gap-3 mb-3">
+          <span class="display-6 fw-bold" style="color: var(--aura-text);">₹{{ product.price }}</span>
+          {% if product.compare_at_price %}
+            <span class="fs-5 text-muted text-decoration-line-through">₹{{ product.compare_at_price }}</span>
+            <span class="badge bg-dark small">-{{ product.discount_percent }}%</span>
+          {% endif %}
+        </div>
+
+        <!-- Stock Availability -->
+        <div class="mb-4">
+          {% if product.is_in_stock %}
+            {% if product.stock_quantity <= 5 %}
+              <span class="badge badge-status badge-pending">
+                <i class="bi bi-exclamation-circle me-1"></i> Low Stock: Only {{ product.stock_quantity }} Available
+              </span>
+            {% else %}
+              <span class="badge badge-status badge-delivered">
+                <i class="bi bi-check-circle me-1"></i> Available in Atelier ({{ product.stock_quantity }} units)
+              </span>
+            {% endif %}
+          {% else %}
+            <span class="badge badge-status badge-cancelled">
+              <i class="bi bi-x-circle me-1"></i> Temporarily Out of Stock
+            </span>
+          {% endif %}
+          <span class="small text-muted ms-3">SKU: {{ product.sku }}</span>
+        </div>
+
+        <p class="text-muted mb-4" style="line-height: 1.8;">
+          {{ product.short_description|default:product.description|truncatewords:40 }}
+        </p>
+
+        <!-- Actions -->
+        {% if product.is_in_stock %}
+          <div class="row g-3 align-items-center mb-4">
+            <div class="col-sm-4">
+              <label class="form-label small">Quantity</label>
+              <input type="number" id="product-detail-qty" class="form-control text-center" value="1" min="1" max="{{ product.stock_quantity }}">
+            </div>
+            <div class="col-sm-8 pt-sm-4">
+              <button class="btn btn-aura w-100 py-3 btn-add-to-cart-ajax" data-product-id="{{ product.id }}">
+                <i class="bi bi-bag-plus me-2"></i> Acquire to Bag
+              </button>
+            </div>
+          </div>
+        {% else %}
+          <button class="btn btn-secondary w-100 py-3 mb-4" disabled>Out of Stock</button>
+        {% endif %}
+
+        <div class="d-flex gap-3 mb-5">
+          <button class="btn btn-outline-dark btn-sm flex-grow-1 btn-wishlist-toggle {% if product.id in user_wishlist_product_ids %}active{% endif %}" data-product-id="{{ product.id }}">
+            <i class="bi {% if product.id in user_wishlist_product_ids %}bi-heart-fill text-danger{% else %}bi-heart{% endif %} me-1"></i> Save to Private Wishlist
+          </button>
+          <a href="{% url 'reviews:add_review' product_id=product.id %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-pencil me-1"></i> Write Review
+          </a>
+        </div>
+
+        <!-- Vendor Spotlight Card -->
+        <div class="p-4 rounded border bg-white shadow-sm mb-4">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; overflow: hidden;">
+              {% if product.vendor.logo %}
+                <img src="{{ product.vendor.logo.url }}" alt="{{ product.vendor.store_name }}" class="w-100 h-100 object-fit-cover">
+              {% else %}
+                <i class="bi bi-shop text-muted fs-4"></i>
+              {% endif %}
+            </div>
+            <div>
+              <h6 class="mb-0 fw-bold">{{ product.vendor.store_name }}</h6>
+              <span class="small text-muted"><i class="bi bi-shield-check text-success"></i> Vetted Master Merchant</span>
+            </div>
+            <a href="{% url 'vendors:store_detail' slug=product.vendor.slug %}" class="btn btn-sm btn-aura-outline ms-auto">Visit Boutique</a>
+          </div>
+          <p class="small text-muted mb-0">Dispatched directly with certified provenance and bespoke packaging.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Description & Specifications -->
+  <div class="card p-4 p-md-5 border shadow-sm bg-white mt-5" style="border-radius: var(--aura-radius-lg);">
+    <ul class="nav nav-tabs border-bottom mb-4" id="productTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-bold text-uppercase small" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc-pane" type="button" role="tab" style="letter-spacing: 0.05em;">Provenance & Details</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold text-uppercase small" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-pane" type="button" role="tab" style="letter-spacing: 0.05em;">Customer Reviews ({{ reviews.count }})</button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="productTabsContent">
+      <div class="tab-pane fade show active" id="desc-pane" role="tabpanel" style="line-height: 1.8;">
+        {{ product.description|linebreaks }}
+      </div>
+
+      <div class="tab-pane fade" id="reviews-pane" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h5 class="mb-1">Patron Appraisals</h5>
+            <span class="small text-muted">Authentic feedback from verified purchasers</span>
+          </div>
+          <a href="{% url 'reviews:add_review' product_id=product.id %}" class="btn btn-sm btn-aura">Appraise Product</a>
+        </div>
+
+        {% for rev in reviews %}
+          <div class="p-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <div>
+                <strong>{{ rev.customer.get_short_name }}</strong>
+                {% if rev.is_verified_purchase %}
+                  <span class="badge bg-success-subtle text-success border border-success-subtle small ms-2"><i class="bi bi-patch-check"></i> Verified Acquisition</span>
+                {% endif %}
+              </div>
+              <span class="small text-muted">{{ rev.created_at|date:"M d, Y" }}</span>
+            </div>
+            <div class="text-warning small mb-2">
+              {% for i in "12345" %}
+                {% if forloop.counter <= rev.rating %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+              {% endfor %}
+            </div>
+            <h6 class="fw-bold mb-1">{{ rev.title }}</h6>
+            <p class="small text-muted mb-0">{{ rev.comment }}</p>
+          </div>
+        {% empty %}
+          <div class="text-center py-4 text-muted">
+            <p class="mb-3">Be the first to appraise this masterwork.</p>
+            <a href="{% url 'reviews:add_review' product_id=product.id %}" class="btn btn-sm btn-aura-outline">Write First Review</a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Creations -->
+  {% if related_products %}
+    <div class="mt-5 pt-4">
+      <h3 class="mb-4">Complementary Masterpieces</h3>
+      <div class="row g-4">
+        {% for rel in related_products %}
+          <div class="col-6 col-md-3">
+            <div class="product-card">
+              <a href="{{ rel.get_absolute_url }}" class="product-image-wrap">
+                {% if rel.primary_image %}
+                  <img src="{{ rel.primary_image.image.url }}" alt="{{ rel.title }}">
+                {% else %}
+                  <div class="product-placeholder-img"><i class="bi bi-gem"></i></div>
+                {% endif %}
+              </a>
+              <div class="product-card-body">
+                <h6 class="product-title mb-1"><a href="{{ rel.get_absolute_url }}">{{ rel.title }}</a></h6>
+                <div class="product-price-current">₹{{ rel.price }}</div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

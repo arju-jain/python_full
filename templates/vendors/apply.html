@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="text-center mb-5">
+        <span class="section-subtitle">Vendor Onboarding</span>
+        <h1 class="section-title">Open an Atelier on Aura Luxe</h1>
+        <p class="section-desc">Join an elite ecosystem of vetted artisans, independent watchmakers, luxury jewelers, and bespoke makers.</p>
+      </div>
+
+      <div class="card p-4 p-md-5 border shadow-sm bg-white" style="border-radius: var(--aura-radius-lg);">
+        <form method="POST">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger py-2 small mb-3">
+              {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label">Brand / Atelier Name</label>
+            {{ form.store_name }}
+            {% if form.store_name.errors %}<div class="text-danger small mt-1">{{ form.store_name.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Official Business Email</label>
+              {{ form.contact_email }}
+              {% if form.contact_email.errors %}<div class="text-danger small mt-1">{{ form.contact_email.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Direct Phone / Concierge Line</label>
+              {{ form.phone_number }}
+              {% if form.phone_number.errors %}<div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Tax ID / Business Registration (GSTIN / VAT)</label>
+            {{ form.tax_id }}
+            {% if form.tax_id.errors %}<div class="text-danger small mt-1">{{ form.tax_id.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Provenance & Craftsmanship Portfolio</label>
+            {{ form.business_details }}
+            {% if form.business_details.errors %}<div class="text-danger small mt-1">{{ form.business_details.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="p-3 bg-light border rounded small text-muted mb-4">
+            <i class="bi bi-info-circle me-1"></i> Applications are reviewed by our curatorial committee within 24 to 48 hours. Upon approval, you will gain full access to the Seller Cockpit. Standard commission rate is 10.00%.
+          </div>
+
+          <button type="submit" class="btn btn-aura w-100 py-3">Submit Onboarding Dossier</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

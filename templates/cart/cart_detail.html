@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="mb-4">
+    <span class="section-subtitle text-start">Curated Bag</span>
+    <h2 class="section-title text-start mb-0">Shopping Bag</h2>
+  </div>
+
+  {% if cart.total_items > 0 %}
+    <div class="row g-5">
+      <!-- Items Table -->
+      <div class="col-lg-8">
+        <div class="card border shadow-sm bg-white overflow-hidden" style="border-radius: var(--aura-radius-lg);">
+          <div class="table-responsive">
+            <table class="table table-aura align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="min-width: 280px;">Item & Atelier</th>
+                  <th>Unit Price</th>
+                  <th style="min-width: 140px;">Quantity</th>
+                  <th>Subtotal</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in cart_items %}
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="rounded border p-1 bg-light" style="width: 64px; height: 64px; flex-shrink: 0; overflow: hidden;">
+                          {% if item.product.primary_image %}
+                            <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.title }}" class="w-100 h-100 object-fit-cover rounded">
+                          {% else %}
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted"><i class="bi bi-gem"></i></div>
+                          {% endif %}
+                        </div>
+                        <div>
+                          <a href="{{ item.product.get_absolute_url }}" class="fw-bold text-dark text-decoration-none d-block">{{ item.product.title }}</a>
+                          <span class="small text-muted"><i class="bi bi-shop me-1"></i> {{ item.product.vendor.store_name }}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="fw-semibold">₹{{ item.unit_price }}</span>
+                    </td>
+                    <td>
+                      <div class="input-group input-group-sm" style="max-width: 110px;">
+                        <button class="btn btn-outline-secondary cart-qty-btn" data-item-id="{{ item.id }}" type="button">-</button>
+                        <input type="text" id="cart-qty-input-{{ item.id }}" class="form-control text-center bg-white" value="{{ item.quantity }}" readonly>
+                        <button class="btn btn-outline-secondary cart-qty-btn btn-plus" data-item-id="{{ item.id }}" type="button">+</button>
+                      </div>
+                    </td>
+                    <td>
+                      <span id="item-subtotal-{{ item.id }}" class="fw-bold">₹{{ item.subtotal }}</span>
+                    </td>
+                    <td>
+                      <form action="{% url 'cart:cart_remove' item_id=item.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link text-danger p-0" title="Remove Item">
+                          <i class="bi bi-trash fs-5"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <a href="{% url 'catalog:product_list' %}" class="btn btn-aura-outline">
+            <i class="bi bi-arrow-left me-2"></i> Continue Shopping
+          </a>
+        </div>
+      </div>
+
+      <!-- Order Summary Card -->
+      <div class="col-lg-4">
+        <div class="card p-4 border shadow-sm bg-white sticky-top" style="top: 100px; border-radius: var(--aura-radius-lg);">
+          <h5 class="fw-bold mb-4">Acquisition Summary</h5>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Item Subtotal</span>
+            <span id="cart-summary-subtotal" class="fw-semibold">₹{{ cart.subtotal }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-3">
+            <span class="text-muted">Insured White-Glove Transit</span>
+            <span class="fw-semibold">
+              {% if cart.estimated_shipping == 0 %}
+                <span class="text-success">Complimentary</span>
+              {% else %}
+                ₹{{ cart.estimated_shipping }}
+              {% endif %}
+            </span>
+          </div>
+
+          {% if cart.subtotal < 5000 %}
+            <div class="p-2 mb-3 bg-light border rounded small text-muted">
+              <i class="bi bi-info-circle me-1"></i> Add items worth ₹{{ 5000|add:"-cart.subtotal" }} more for complimentary delivery.
+            </div>
+          {% endif %}
+
+          <hr class="my-3">
+
+          <div class="d-flex justify-content-between mb-4">
+            <span class="fs-5 fw-bold">Total Payable</span>
+            <span id="cart-summary-total" class="fs-4 fw-bold" style="color: var(--aura-text);">₹{{ cart.grand_total }}</span>
+          </div>
+
+          <a href="{% url 'orders:checkout' %}" class="btn btn-aura w-100 py-3">
+            Proceed to Checkout <i class="bi bi-shield-lock ms-2"></i>
+          </a>
+
+          <div class="mt-4 pt-3 border-top small text-muted text-center">
+            <div><i class="bi bi-shield-check text-success me-1"></i> Razorpay Encrypted Test Gateway</div>
+            <div class="mt-1">Multi-Vendor items will dispatch from respective ateliers.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="card p-5 border shadow-sm bg-white text-center my-4" style="border-radius: var(--aura-radius-lg);">
+      <div class="mb-3 mx-auto rounded-circle bg-light border d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+        <i class="bi bi-bag fs-1 text-muted"></i>
+      </div>
+      <h4>Your Shopping Bag is Empty</h4>
+      <p class="text-muted small mb-4">Explore our curated collections of rare artisanal creations.</p>
+      <a href="{% url 'catalog:product_list' %}" class="btn btn-aura mx-auto">Explore Gallery</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

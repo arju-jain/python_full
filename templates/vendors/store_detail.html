@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Store Header Banner -->
+  <div class="card border-0 shadow-sm overflow-hidden mb-5 bg-white" style="border-radius: var(--aura-radius-lg);">
+    {% if vendor.banner %}
+      <div style="height: 220px; background: url('{{ vendor.banner.url }}') center/cover no-repeat;"></div>
+    {% else %}
+      <div style="height: 160px; background: linear-gradient(135deg, #262725 0%, #3B3C38 100%);"></div>
+    {% endif %}
+
+    <div class="p-4 p-md-5 position-relative">
+      <div class="d-flex align-items-center gap-4 flex-wrap">
+        <div class="rounded-circle bg-white border p-1 shadow-sm" style="width: 100px; height: 100px; margin-top: -60px; overflow: hidden; flex-shrink: 0;">
+          {% if vendor.logo %}
+            <img src="{{ vendor.logo.url }}" alt="{{ vendor.store_name }}" class="w-100 h-100 object-fit-cover rounded-circle">
+          {% else %}
+            <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light rounded-circle text-muted fs-2">
+              <i class="bi bi-shop"></i>
+            </div>
+          {% endif %}
+        </div>
+
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <h2 class="mb-0 fw-bold">{{ vendor.store_name }}</h2>
+            <span class="badge bg-success small"><i class="bi bi-patch-check-fill me-1"></i> Verified Atelier</span>
+          </div>
+          <p class="text-muted small mb-0">{{ vendor.description|default:"Curated masterworks on Aura Luxe" }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boutique Products -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Boutique Collection ({{ products.count }})</h4>
+    <span class="small text-muted">All pieces dispatched directly by {{ vendor.store_name }}</span>
+  </div>
+
+  <div class="row g-4">
+    {% for product in products %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="product-card">
+          <button class="product-wishlist-btn btn-wishlist-toggle {% if product.id in user_wishlist_product_ids %}active{% endif %}" data-product-id="{{ product.id }}">
+            <i class="bi {% if product.id in user_wishlist_product_ids %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+          </button>
+          {% if product.discount_percent %}
+            <span class="product-badge-discount">-{{ product.discount_percent }}%</span>
+          {% endif %}
+          <a href="{{ product.get_absolute_url }}" class="product-image-wrap">
+            {% if product.primary_image %}
+              <img src="{{ product.primary_image.image.url }}" alt="{{ product.title }}">
+            {% else %}
+              <div class="product-placeholder-img"><i class="bi bi-gem"></i></div>
+            {% endif %}
+          </a>
+          <div class="product-card-body">
+            <h5 class="product-title"><a href="{{ product.get_absolute_url }}">{{ product.title }}</a></h5>
+            <div class="product-price-row">
+              <span class="product-price-current">₹{{ product.price }}</span>
+              {% if product.compare_at_price %}
+                <span class="product-price-compare">₹{{ product.compare_at_price }}</span>
+              {% endif %}
+            </div>
+            <div class="mt-3">
+              <button class="btn btn-sm btn-aura w-100 btn-add-to-cart-ajax" data-product-id="{{ product.id }}">
+                <i class="bi bi-bag-plus"></i> Add to Bag
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12 py-5 text-center text-muted">
+        <p>No products currently displayed in this boutique gallery.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

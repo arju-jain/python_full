@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <span class="section-subtitle text-start">Address Book</span>
+      <h2 class="section-title text-start mb-0">Delivery & Billing Addresses</h2>
+    </div>
+    <a href="{% url 'accounts:address_add' %}" class="btn btn-aura">
+      <i class="bi bi-plus-lg me-1"></i> Add New Address
+    </a>
+  </div>
+
+  <div class="row g-4">
+    {% for address in addresses %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 p-4 border shadow-sm bg-white position-relative" style="border-radius: var(--aura-radius-lg);">
+          {% if address.is_default %}
+            <span class="position-absolute top-0 end-0 m-3 badge bg-success">Default</span>
+          {% endif %}
+          <div class="small text-uppercase text-muted fw-bold mb-2">{{ address.get_address_type_display }} Address</div>
+          <h5 class="fw-bold mb-1">{{ address.full_name }}</h5>
+          <p class="small text-muted mb-3">{{ address.phone_number }}</p>
+          <div class="small text-muted mb-4" style="line-height: 1.6;">
+            {{ address.street_address_1 }}<br>
+            {% if address.street_address_2 %}{{ address.street_address_2 }}<br>{% endif %}
+            {{ address.city }}, {{ address.state }} - {{ address.postal_code }}<br>
+            {{ address.country }}
+          </div>
+          <div class="d-flex gap-2 mt-auto pt-3 border-top">
+            <a href="{% url 'accounts:address_edit' pk=address.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+            {% if not address.is_default %}
+              <form action="{% url 'accounts:address_set_default' pk=address.pk %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-dark">Set Default</button>
+              </form>
+            {% endif %}
+            <form action="{% url 'accounts:address_delete' pk=address.pk %}" method="POST" class="d-inline ms-auto" onsubmit="return confirm('Remove this address?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12 py-5 text-center text-muted">
+        <i class="bi bi-geo-alt fs-1 d-block mb-3" style="color: var(--aura-accent);"></i>
+        <h5>No Addresses Saved</h5>
+        <p class="small mb-4">Add your shipping details for rapid white-glove checkout.</p>
+        <a href="{% url 'accounts:address_add' %}" class="btn btn-aura">Add First Address</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

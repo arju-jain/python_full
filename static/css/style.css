@@ -1,0 +1,224 @@
+/* ==========================================================================
+   AURA LUXE — Premium Multi-Vendor Marketplace Stylesheet
+   Color System:
+     Background: #F7F5F0
+     Main Text:  #20211F
+     Secondary:  #77736B
+     Accent Gold:#B69B75
+     Card Bg:    #FFFFFF
+     Border:     #E9E6DF
+     Success:    #536B59
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --aura-bg: #F7F5F0;
+  --aura-card: #FFFFFF;
+  --aura-text: #20211F;
+  --aura-text-muted: #77736B;
+  --aura-accent: #B69B75;
+  --aura-accent-hover: #9F835D;
+  --aura-accent-soft: rgba(182, 155, 117, 0.12);
+  --aura-border: #E9E6DF;
+  --aura-border-dark: #D4CEBE;
+  --aura-success: #536B59;
+  --aura-danger: #9B3B3B;
+  --aura-shadow-sm: 0 2px 8px rgba(32, 33, 31, 0.04);
+  --aura-shadow-md: 0 8px 24px rgba(32, 33, 31, 0.06);
+  --aura-shadow-lg: 0 16px 36px rgba(32, 33, 31, 0.08);
+  --aura-radius: 4px;
+  --aura-radius-lg: 8px;
+}
+
+body {
+  background-color: var(--aura-bg);
+  color: var(--aura-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-serif, .brand-logo {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.03em;
+  color: var(--aura-text);
+}
+
+h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--aura-text);
+}
+
+a {
+  color: var(--aura-text);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--aura-accent);
+}
+
+/* Top Announcement Bar */
+.top-announcement {
+  background-color: var(--aura-text);
+  color: #ECE8E0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 0;
+}
+
+/* Navbar */
+.navbar-aura {
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--aura-border);
+  padding: 16px 0;
+  transition: all 0.3s ease;
+}
+
+.brand-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--aura-text);
+  text-transform: uppercase;
+}
+
+.brand-logo span {
+  color: var(--aura-accent);
+}
+
+.nav-link-aura {
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 6px 14px;
+  color: var(--aura-text);
+}
+
+.nav-link-aura:hover, .nav-link-aura.active {
+  color: var(--aura-accent);
+}
+
+/* Luxury Hero */
+.hero-luxury {
+  background: linear-gradient(135deg, #1C1D1B 0%, #292A27 100%);
+  color: #F7F5F0;
+  padding: 80px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-luxury::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at 80% 30%, rgba(182, 155, 117, 0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-luxury h1 {
+  font-size: 3.2rem;
+  line-height: 1.15;
+  color: #FFFFFF;
+}
+
+.hero-luxury p {
+  color: #D3CEBF;
+  font-size: 1.1rem;
+}
+
+/* Section Header */
+.section-header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.section-subtitle {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--aura-accent);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.section-title {
+  font-size: 2.2rem;
+  margin-bottom: 12px;
+}
+
+.section-desc {
+  color: var(--aura-text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Category Pill & Cards */
+.category-card {
+  background: #FFFFFF;
+  border: 1px solid var(--aura-border);
+  border-radius: var(--aura-radius-lg);
+  padding: 24px;
+  text-align: center;
+  transition: all 0.25s ease;
+  display: block;
+}
+
+.category-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--aura-accent);
+  box-shadow: var(--aura-shadow-md);
+}
+
+.category-card .cat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--aura-accent-soft);
+  color: var(--aura-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+  font-size: 1.4rem;
+}
+
+/* Footer */
+.footer-aura {
+  background-color: #171816;
+  color: #A8A398;
+  padding: 70px 0 30px 0;
+  border-top: 1px solid #2B2C28;
+  font-size: 0.9rem;
+}
+
+.footer-aura h5 {
+  color: #ECE8E0;
+  font-family: 'Cinzel', serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 20px;
+}
+
+.footer-aura a {
+  color: #9E988D;
+}
+
+.footer-aura a:hover {
+  color: var(--aura-accent);
+}
+
+.footer-bottom {
+  border-top: 1px solid #262723;
+  margin-top: 50px;
+  padding-top: 25px;
+  font-size: 0.82rem;
+  color: #7A756B;
+}

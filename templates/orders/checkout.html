@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="mb-4">
+    <span class="section-subtitle text-start">Secure Acquisition</span>
+    <h2 class="section-title text-start mb-0">Multi-Vendor Checkout</h2>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="row g-5">
+      <!-- Shipping Address Selection -->
+      <div class="col-lg-7">
+        <div class="card p-4 p-md-5 border shadow-sm bg-white mb-4" style="border-radius: var(--aura-radius-lg);">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">1. Select Delivery Address</h4>
+            <a href="{% url 'accounts:address_add' %}?next={{ request.path }}" class="small fw-semibold text-decoration-none">
+              <i class="bi bi-plus-lg me-1"></i> Add New Address
+            </a>
+          </div>
+
+          {% if addresses %}
+            <div class="d-flex flex-column gap-3 mb-4">
+              {% for addr in addresses %}
+                <label class="card p-3 border rounded cursor-pointer {% if form.shipping_address.value == addr.id or forloop.first and not form.shipping_address.value %}border-dark bg-light{% endif %}" style="transition: all 0.2s;">
+                  <div class="d-flex align-items-start gap-3">
+                    <input type="radio" name="shipping_address" value="{{ addr.id }}" class="form-check-input mt-1" {% if form.shipping_address.value == addr.id or forloop.first and not form.shipping_address.value %}checked{% endif %} required>
+                    <div class="flex-grow-1">
+                      <div class="d-flex justify-content-between">
+                        <strong>{{ addr.full_name }}</strong>
+                        {% if addr.is_default %}<span class="badge bg-dark small">Default</span>{% endif %}
+                      </div>
+                      <div class="small text-muted mt-1">
+                        {{ addr.street_address_1 }}{% if addr.street_address_2 %}, {{ addr.street_address_2 }}{% endif %}<br>
+                        {{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }} ({{ addr.country }})<br>
+                        Phone: {{ addr.phone_number }}
+                      </div>
+                    </div>
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-warning py-3 small">
+              No delivery address found. Please <a href="{% url 'accounts:address_add' %}?next={{ request.path }}" class="fw-bold">add an address</a> first.
+            </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label">Client Delivery Instructions (Optional)</label>
+            {{ form.customer_notes }}
+          </div>
+        </div>
+
+        <!-- Vendor Dispatch Notice -->
+        <div class="p-3 bg-white border rounded shadow-sm small text-muted">
+          <div class="d-flex align-items-center gap-2 mb-1 text-dark fw-semibold">
+            <i class="bi bi-boxes fs-5 text-primary"></i> Multi-Vendor Dispatch Notice
+          </div>
+          Your order will be split into individual seller fulfillments. Each merchant will package and ship their respective pieces directly from their atelier.
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="col-lg-5">
+        <div class="card p-4 border shadow-sm bg-white sticky-top" style="top: 100px; border-radius: var(--aura-radius-lg);">
+          <h4 class="mb-4">2. Order Summary</h4>
+
+          <div class="d-flex flex-column gap-3 mb-4">
+            {% for item in cart_items %}
+              <div class="d-flex justify-content-between align-items-center gap-2 pb-2 border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-light text-dark border">{{ item.quantity }}x</span>
+                  <div>
+                    <div class="small fw-semibold text-truncate" style="max-width: 200px;">{{ item.product.title }}</div>
+                    <div class="small text-muted" style="font-size: 0.75rem;"><i class="bi bi-shop me-1"></i> {{ item.product.vendor.store_name }}</div>
+                  </div>
+                </div>
+                <span class="small fw-bold">₹{{ item.subtotal }}</span>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">Subtotal</span>
+            <span class="fw-semibold">₹{{ cart.subtotal }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-3">
+            <span class="text-muted">Insured Courier Delivery</span>
+            <span class="fw-semibold">
+              {% if cart.estimated_shipping == 0 %}
+                <span class="text-success">Complimentary</span>
+              {% else %}
+                ₹{{ cart.estimated_shipping }}
+              {% endif %}
+            </span>
+          </div>
+
+          <hr class="my-3">
+
+          <div class="d-flex justify-content-between mb-4">
+            <span class="fs-5 fw-bold">Grand Total</span>
+            <span class="fs-4 fw-bold" style="color: var(--aura-text);">₹{{ cart.grand_total }}</span>
+          </div>
+
+          <button type="submit" class="btn btn-aura w-100 py-3">
+            Place Order & Proceed to Payment <i class="bi bi-credit-card ms-2"></i>
+          </button>
+
+          <div class="text-center small text-muted mt-3">
+            <i class="bi bi-shield-lock me-1"></i> Payments secured via Razorpay Test Gateway
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

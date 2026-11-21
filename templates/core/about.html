@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="text-center mb-5">
+        <span class="section-subtitle">Heritage & Vision</span>
+        <h1 class="section-title">The Philosophy of Aura Luxe</h1>
+      </div>
+      <div class="card p-4 p-md-5 border shadow-sm" style="background: #FFFFFF; border-radius: var(--aura-radius-lg); line-height: 1.8;">
+        <h4 class="mb-3">A Sanctuary for Sovereign Craftsmanship</h4>
+        <p class="text-muted">
+          Aura Luxe was conceived to bridge the world's most discerning patrons with master craftsmen whose traditions transcend mass retail. From private Swiss watchmaking ateliers to florentine leather guilds, we select sellers who refuse compromise in raw materials and design integrity.
+        </p>
+        <h4 class="mt-4 mb-3">Multi-Vendor Innovation</h4>
+        <p class="text-muted">
+          Our architecture enables independent luxury houses to maintain their own boutique identity, inventory, and bespoke fulfillment while offering clients a unified, seamless shopping experience. Patrons can curate items across four ateliers on three continents and settle via a single cryptographically verified transaction.
+        </p>
+        <h4 class="mt-4 mb-3">Authenticity & Curatorial Vetting</h4>
+        <p class="text-muted">
+          No merchant may list on Aura Luxe without comprehensive curatorial review. We verify business registration, tax compliance, workshop credentials, and material provenance before granting boutique status.
+        </p>
+        <div class="text-center mt-5">
+          <a href="{% url 'catalog:product_list' %}" class="btn btn-aura">Discover the Collections</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

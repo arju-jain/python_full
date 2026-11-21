@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5 my-lg-4">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="card p-4 p-md-5 border shadow-sm bg-white text-center" style="border-radius: var(--aura-radius-lg);">
+        {% if vendor and vendor.status == 'APPROVED' %}
+          <div class="mb-3 mx-auto rounded-circle bg-success text-white d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+            <i class="bi bi-check2 fs-1"></i>
+          </div>
+          <h3 class="mb-2">Boutique Approved</h3>
+          <p class="text-muted small mb-4">Your store <strong>{{ vendor.store_name }}</strong> is officially active on Aura Luxe.</p>
+          <a href="{% url 'dashboard:vendor_overview' %}" class="btn btn-aura">Enter Seller Cockpit</a>
+
+        {% elif application and application.status == 'PENDING' %}
+          <div class="mb-3 mx-auto rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+            <i class="bi bi-hourglass-split fs-1"></i>
+          </div>
+          <h3 class="mb-2">Review in Progress</h3>
+          <p class="text-muted small mb-3">Your application for <strong>{{ application.store_name }}</strong> was received on {{ application.created_at|date:"M d, Y" }}.</p>
+          <p class="small text-muted mb-4">Our curatorial directors are evaluating your submission. You will be notified via email upon completion of vetting.</p>
+          <a href="{% url 'core:home' %}" class="btn btn-aura-outline">Return to Marketplace</a>
+
+        {% elif application and application.status == 'REJECTED' %}
+          <div class="mb-3 mx-auto rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+            <i class="bi bi-x-lg fs-1"></i>
+          </div>
+          <h3 class="mb-2">Application Unsuccessful</h3>
+          <p class="text-muted small mb-3">Regrettably, your submission did not meet current curatorial standards.</p>
+          {% if application.review_notes %}
+            <div class="p-3 bg-light border rounded text-start small mb-4">
+              <strong>Reviewer Notes:</strong> {{ application.review_notes }}
+            </div>
+          {% endif %}
+          <a href="{% url 'core:contact' %}" class="btn btn-aura-outline">Contact Concierge</a>
+
+        {% else %}
+          <div class="mb-3 mx-auto rounded-circle bg-light text-muted d-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+            <i class="bi bi-shop fs-1"></i>
+          </div>
+          <h3 class="mb-2">No Active Application</h3>
+          <p class="text-muted small mb-4">You have not submitted a vendor application yet.</p>
+          <a href="{% url 'vendors:apply' %}" class="btn btn-aura">Apply as Artisan Vendor</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
