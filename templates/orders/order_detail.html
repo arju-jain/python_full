@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Header -->
+  <div class="card p-4 p-md-5 border shadow-sm bg-white mb-4" style="border-radius: var(--aura-radius-lg);">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+      <div>
+        <span class="small text-uppercase text-muted fw-bold">Order Dossier</span>
+        <h2 class="h3 fw-bold mb-1">#{{ order.order_number }}</h2>
+        <div class="small text-muted">Placed on {{ order.created_at|date:"F d, Y, h:i A" }}</div>
+      </div>
+      <div class="d-flex flex-column align-items-end gap-2">
+        <div>
+          <span class="badge badge-status badge-{{ order.status|lower }}">{{ order.get_status_display }}</span>
+          <span class="badge badge-status badge-{{ order.payment_status|lower }} ms-1">{{ order.get_payment_status_display }}</span>
+        </div>
+        <div class="fs-4 fw-bold" style="color: var(--aura-text);">₹{{ order.total_amount }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Multi-Vendor Fulfillments -->
+    <div class="col-lg-8">
+      <h4 class="mb-3">Seller Shipments & Items</h4>
+
+      {% for fulfillment in order.fulfillments.all %}
+        <div class="card border shadow-sm bg-white mb-4 overflow-hidden" style="border-radius: var(--aura-radius-lg);">
+          <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <span class="small text-muted text-uppercase fw-bold">Atelier / Merchant:</span>
+              <a href="{% url 'vendors:store_detail' slug=fulfillment.vendor.slug %}" class="fw-bold text-dark ms-1">
+                {{ fulfillment.vendor.store_name }}
+              </a>
+            </div>
+            <div>
+              <span class="badge badge-status badge-{{ fulfillment.status|lower }}">
+                {{ fulfillment.get_status_display }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Tracking Info if shipped -->
+          {% if fulfillment.tracking_number %}
+            <div class="p-3 bg-white border-bottom small">
+              <i class="bi bi-truck me-2 text-primary"></i>
+              <strong>Carrier:</strong> {{ fulfillment.shipping_carrier|default:"Courier" }} &nbsp;|&nbsp;
+              <strong>Tracking Code:</strong> <code class="text-dark">{{ fulfillment.tracking_number }}</code>
+              {% if fulfillment.dispatched_at %}
+                <span class="text-muted ms-2">(Dispatched: {{ fulfillment.dispatched_at|date:"M d, Y" }})</span>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          <div class="table-responsive">
+            <table class="table table-aura align-middle mb-0">
+              <tbody>
+                {% for item in fulfillment.vendor_items %}
+                  <tr>
+                    <td style="min-width: 250px;">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="rounded border p-1 bg-light" style="width: 52px; height: 52px; overflow: hidden; flex-shrink: 0;">
+                          {% if item.product.primary_image %}
+                            <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product_title }}" class="w-100 h-100 object-fit-cover rounded">
+                          {% else %}
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted"><i class="bi bi-gem"></i></div>
+                          {% endif %}
+                        </div>
+                        <div>
+                          <a href="{{ item.product.get_absolute_url }}" class="fw-bold text-dark text-decoration-none d-block small">
+                            {{ item.product_title }}
+                          </a>
+                          <span class="small text-muted" style="font-size: 0.75rem;">SKU: {{ item.sku }}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span class="small">₹{{ item.unit_price }} × {{ item.quantity }}</span></td>
+                    <td class="text-end fw-bold">₹{{ item.subtotal }}</td>
+                    <td class="text-end">
+                      <a href="{% url 'reviews:add_review' product_id=item.product.id %}" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;">
+                        <i class="bi bi-star me-1"></i> Review
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Delivery Address & Financial Snapshot -->
+    <div class="col-lg-4">
+      <!-- Shipping Address -->
+      <div class="card p-4 border shadow-sm bg-white mb-4" style="border-radius: var(--aura-radius-lg);">
+        <h5 class="fw-bold mb-3">Delivery Destination</h5>
+        <div class="small text-muted" style="line-height: 1.7;">
+          <strong class="text-dark">{{ order.shipping_full_name }}</strong><br>
+          {{ order.shipping_address_line1 }}<br>
+          {% if order.shipping_address_line2 %}{{ order.shipping_address_line2 }}<br>{% endif %}
+          {{ order.shipping_city }}, {{ order.shipping_state }} - {{ order.shipping_postal_code }}<br>
+          {{ order.shipping_country }}<br>
+          <i class="bi bi-telephone me-1"></i> {{ order.shipping_phone }}
+        </div>
+      </div>
+
+      <!-- Payment & Totals -->
+      <div class="card p-4 border shadow-sm bg-white" style="border-radius: var(--aura-radius-lg);">
+        <h5 class="fw-bold mb-3">Payment Summary</h5>
+        <div class="d-flex justify-content-between mb-2 small">
+          <span class="text-muted">Subtotal</span>
+          <span>₹{{ order.subtotal_amount }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-3 small">
+          <span class="text-muted">Insured Courier Transit</span>
+          <span>{% if order.shipping_amount == 0 %}Complimentary{% else %}₹{{ order.shipping_amount }}{% endif %}</span>
+        </div>
+        <hr class="my-2">
+        <div class="d-flex justify-content-between mb-3">
+          <span class="fw-bold">Total Paid</span>
+          <span class="fw-bold fs-5">₹{{ order.total_amount }}</span>
+        </div>
+
+        {% if order.payment %}
+          <div class="p-3 bg-light rounded small text-muted border">
+            <div><strong>Transaction Reference:</strong></div>
+            <div class="text-truncate">{{ order.payment.transaction_id }}</div>
+            {% if order.payment.razorpay_payment_id %}
+              <div class="mt-1"><strong>Razorpay Payment ID:</strong> {{ order.payment.razorpay_payment_id }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if order.payment_status == 'UNPAID' %}
+          <a href="{% url 'payments:initiate' order_number=order.order_number %}" class="btn btn-aura w-100 mt-3 py-2">
+            Complete Pending Payment
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

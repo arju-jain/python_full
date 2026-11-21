@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="mb-4">
+    <span class="section-subtitle text-start">Client Dossier</span>
+    <h2 class="section-title text-start mb-0">My Acquisitions & Orders</h2>
+  </div>
+
+  {% if orders %}
+    <div class="card border shadow-sm bg-white overflow-hidden" style="border-radius: var(--aura-radius-lg);">
+      <div class="table-responsive">
+        <table class="table table-aura align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Date</th>
+              <th>Total Amount</th>
+              <th>Order Status</th>
+              <th>Payment</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ord in orders %}
+              <tr>
+                <td>
+                  <a href="{% url 'orders:detail' order_number=ord.order_number %}" class="fw-bold text-dark">
+                    #{{ ord.order_number }}
+                  </a>
+                </td>
+                <td class="small text-muted">{{ ord.created_at|date:"M d, Y" }}</td>
+                <td class="fw-bold">₹{{ ord.total_amount }}</td>
+                <td>
+                  <span class="badge badge-status badge-{{ ord.status|lower }}">
+                    {{ ord.get_status_display }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge badge-status badge-{{ ord.payment_status|lower }}">
+                    {{ ord.get_payment_status_display }}
+                  </span>
+                </td>
+                <td>
+                  <a href="{% url 'orders:detail' order_number=ord.order_number %}" class="btn btn-sm btn-aura-outline py-1 px-3">
+                    View Order
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="card p-5 border shadow-sm bg-white text-center my-4" style="border-radius: var(--aura-radius-lg);">
+      <div class="mb-3 mx-auto rounded-circle bg-light border d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+        <i class="bi bi-receipt fs-1 text-muted"></i>
+      </div>
+      <h4>No Past Orders Recorded</h4>
+      <p class="text-muted small mb-4">When you place orders on Aura Luxe, your tracking details and receipts will appear here.</p>
+      <a href="{% url 'catalog:product_list' %}" class="btn btn-aura mx-auto">Explore Gallery</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
