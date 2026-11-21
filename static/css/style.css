@@ -197,6 +197,36 @@ a:hover {
   object-fit: cover;
 }
 
+/* Category imagery remains visible even if the category database image is empty. */
+.category-card .cat-icon i {
+  position: relative;
+  z-index: 1;
+}
+
+.category-card .cat-icon {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.category-card[href*="/dress-couture/"] .cat-icon {
+  background-image: url("/static/images/categories/dress.jpg");
+}
+
+.category-card[href*="/fine-timepieces/"] .cat-icon {
+  background-image: url("/static/images/products/gva-skel-02-primary.png");
+}
+
+.category-card[href*="/high-jewelry/"] .cat-icon {
+  background-image: url("/static/images/products/vdm-sol-01-primary.png");
+}
+
+.category-card[href*="/dress-couture/"] .cat-icon i,
+.category-card[href*="/fine-timepieces/"] .cat-icon i,
+.category-card[href*="/high-jewelry/"] .cat-icon i {
+  display: none;
+}
+
 /* Footer */
 .footer-aura {
   background-color: #171816;
